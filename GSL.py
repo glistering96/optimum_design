@@ -41,6 +41,7 @@ def GSL(f, delta=0.1, eps=10**-5):
         # print(f"a0: {a0}, a1: {a1}, a2: {a2}")
 
     print(f"a0: {a0}, a1: {a1}, a2: {a2}")
+    print("-"*100)
 
     # reduce interval
     l, a, b, u = a0, 0, 0, a2
@@ -48,13 +49,13 @@ def GSL(f, delta=0.1, eps=10**-5):
     d = (u-l)
     b = l + TAU * d
     a = l + (1 - TAU) * d
-    MAX_ITER = 1000
+    MAX_ITER = 2
 
-    i = 1
+    i = 0
+    print(f"Initial: l: {l}, a: {a}, b: {b}, u: {u}")
+
     while abs(u-l) > eps and i < MAX_ITER: # stop if the interval becomes smaller than eps
-        print(f"No: {i} l: {l}, a: {a}, b: {b}, u: {u}")
-
-        if f(a) >= f(b):
+        if f(a) > f(b):
             l = a
             a = b
             b = l + TAU*(u-l)
@@ -64,10 +65,40 @@ def GSL(f, delta=0.1, eps=10**-5):
             b = a
             a = l + (1-TAU)*(u-l)
 
+        elif f(a) == f(b):
+            l = a
+            u = b
+            d = u-l
+            b = l + TAU*d
+            a = l + (1-TAU)*d
+
         i += 1
+        print(f"No: {i} l: {l}, a: {a}, b: {b}, u: {u}")
 
     return (u+l)/2
 
 
 if __name__ == '__main__':
-    GSL(lambda x: x**4-14*x**3+60*x**2-70*x)
+    def opt_f(x):
+        return 24*x**2-24*x+6
+
+    def f(x):
+        return x[0]**2+x[1]**2+x[2]**2
+
+    x0 = np.array([1,2,-1])
+    d = np.array([-2,-4,2])
+
+    def opt_f_auto(x):
+        return f(x0 + d*x)
+
+    def descent(f, x0, d=None):
+
+        if d is None:
+            # cal descent direction
+            pass
+
+        step_size = GSL(f, delta=0.05)
+        return x0+step_size*d
+
+    x0 = descent(opt_f_auto, x0, d)
+    print(f"updated x: {x0} with value: {f(x0)}")
