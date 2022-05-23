@@ -20,11 +20,16 @@ class GradientDescent:
         h_vec = np.zeros(x.shape[-1])
 
         for i in range(grad.shape[-1]):
+            # h_vec[i] = x[i]*0.01
+            # grad[i] = (self.f(x+h_vec)-self.f(x-h_vec))/2*h_vec[i] # central difference (f(x+h) - f(x-h)))/ 2h
             h_vec[i] = h
-            grad[i] = (self.f(x+h_vec)-self.f(x))/h # forward difference (f(x+h) - f(x))/h
+            grad[i] = (self.f(x + h_vec) - self.f(x)) / h  # forward difference (f(x+h) - f(x))/h
             self.func_call_count += 2
             h_vec[i] = 0
-
+        """
+        Opt x: [-3.45168935e-08  2.43711636e-03], func_value: 0.0002969768085458403, num_iter: 3, num_func_calls: 16
+        Opt x: [-2.27860874e-05  1.05911172e-02], func_value: 0.005608589723120626, num_iter: 3, num_func_calls: 12
+        """
         # print(f"grad: {grad}")
         return grad
 
@@ -42,13 +47,14 @@ class GradientDescent:
         return x_opt, func_value
 
     def _steepest_descent(self, x, delta):
-        dir = -self._diff(x)
+        dir = -self._diff(x) # d = -gradient
 
         num_iter = 0
-        while np.linalg.norm(dir) > self.eps:
+        while np.linalg.norm(dir) > self.eps: # until converge
             dir = -self._diff(x)
 
-            def opt_f_auto(p):
+            def opt_f_auto(p): # closure function that takes local variable of method to produce step objective function
+                # equals to f(alpha) in the textbook
                 func_val = self.f(x + dir * p)
                 return func_val
 
@@ -71,15 +77,15 @@ class GradientDescent:
         dir = None
 
         num_iter = 0
-        while np.linalg.norm(c) > self.eps:
-            if first_iter:
+        while np.linalg.norm(c) > self.eps: # c is the latest gradient calculated
+            if first_iter: # as no prev gradient exists
                 dir = -c
                 first_iter = False
 
             else:
                 c_prev = np.copy(c)
                 c = self._diff(x)
-                beta = np.dot(c.T, c) / np.dot(c_prev.T, c_prev)
+                beta = np.dot(c.T, c) / np.dot(c_prev.T, c_prev) # beta = (|c_k+1/c_k|_2)^2
                 dir = -c + beta*dir
 
             def opt_f_auto(p):
@@ -103,7 +109,7 @@ if __name__ == '__main__':
     #     x1 = x[0]
     #     x2 = x[1]
     #
-    #     return 50*(x2-x1**2)**2+(2*x1)**2
+    #     return 50*(x2-x1**2)**2+(2-x1)**2
     #
     # x0 = np.array([5, -5])
 
@@ -127,16 +133,23 @@ if __name__ == '__main__':
     # def f(x):
     #     x1 = x[0]
     #     x2 = x[1]
-    #     return 100*((x2-x1**2)**2)+(1-x1)**2
-    # x0 = np.array([5, 2])
+    #     x3 = x[2]
+    #     return x1**2+2*x2**2+2*x3**2+2*x1*x2+2*x2*x3
+    # x0 = np.array([1,1,1])
 
-    eps = 0.005
+    # def f(x):
+    #     x1 = x[0]
+    #     x2 = x[1]
+    #     return 6.983*x1**2+12.415*x2**2-x1
+    # x0 = np.array([2, 1])
+
+    eps = 0.00001
 
     gd_s = GradientDescent(f, verbose=False, eps=eps)
-    opt_x = gd_s.descent(x0, delta=0.05)
+    opt_x = gd_s.descent(x0, delta=0.005)
 
     gd_c = GradientDescent(f, verbose=False,type='conjugate', eps=eps)
-    opt_x = gd_c.descent(x0, delta=0.05)
+    opt_x = gd_c.descent(x0, delta=0.005)
 
     # def f(x):
     #     x1=x[0]

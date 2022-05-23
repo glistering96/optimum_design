@@ -30,13 +30,19 @@ def run_golden_search(f, delta=0.1, eps=10 ** -5, verbose=False, MAX_ITER = 1000
 
         return _a0, _a1, _a2
 
+    ################################
+    # find interval
+    ################################
     a0 = 0
     a1 = delta
     a2 = a1+delta*KSI
     q = 3
 
     # print(f"a0: {a0}, a1: {a1}, a2: {a2}")
-
+    ################################
+    # reduce interval
+    ################################
+    # find the interval in which possible local minimum is in
     while f(a0) > f(a1) and f(a1) > f(a2):
         a0, a1, a2 = _bracket(a1, a2, q)
         q += 1
@@ -46,7 +52,9 @@ def run_golden_search(f, delta=0.1, eps=10 ** -5, verbose=False, MAX_ITER = 1000
     #     print(f"a0: {a0}, a1: {a1}, a2: {a2}")
     # print("-"*100)
 
+    ################################
     # reduce interval
+    ################################
     l, a, b, u = a0, 0, 0, a2
 
     d = (u-l)
